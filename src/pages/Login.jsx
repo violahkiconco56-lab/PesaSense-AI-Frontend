@@ -1,78 +1,140 @@
 import { useState } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { apiRequest, setToken } from "../api";
 
 function Login() {
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
+  const [values, setValues] = useState({ email: "", password: "" });
+  const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const navigate = useNavigate();
+
+  function validate() {
+    const nextErrors = {};
+    if (!values.email.trim()) {
+      nextErrors.email = "Email address is required.";
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
+      nextErrors.email = "Enter a valid email address.";
+    }
+
+    if (!values.password) {
+      nextErrors.password = "Password is required.";
+    } else if (values.password.length < 8) {
+      nextErrors.password = "Password must be at least 8 characters.";
+    }
+
+    setErrors(nextErrors);
+    return Object.keys(nextErrors).length === 0;
+  }
+
+  function updateField(field, value) {
+    setValues((current) => ({ ...current, [field]: value }));
+    setErrors((current) => ({ ...current, [field]: "" }));
+    setMessage("");
+  }
 
   async function handleLogin(event) {
     event.preventDefault();
+    if (!validate()) return;
+
+    setIsLoading(true);
+    setMessage("");
 
     const formData = new URLSearchParams();
-
-    formData.append("username", username);
-    formData.append("password", password);
+    formData.append("username", values.email);
+    formData.append("password", values.password);
 
     try {
-      const response = await fetch(
-        "http://127.0.0.1:8000/users/login",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/x-www-form-urlencoded",
-          },
-          body: formData,
-        }
-      );
+      const data = await apiRequest("/users/login", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: formData,
+      });
 
-      const data = await response.json();
-
-      if (response.ok) {
-        localStorage.setItem("access_token", data.access_token);
-        window.location.href = "/dashboard";
-      } else {
-        setMessage(data.detail || "Login failed.");
-      }
+      setToken(data.access_token);
+      navigate("/dashboard");
     } catch (error) {
-      console.error(error);
-      setMessage("Could not connect to the server.");
+      // 401 = the credentials themselves are wrong, so point at both fields.
+      // Anything else (server down, 500, network) is not the user's fault and
+      // must not falsely accuse their email or password.
+      if (error.status === 401) {
+        setErrors({
+          email: "Check your email address.",
+          password: "Check your password.",
+        });
+        setMessage(error.message || "Invalid email or password.");
+      } else {
+        setMessage(error.message || "Could not connect to the server.");
+      }
+    } finally {
+      setIsLoading(false);
     }
   }
 
   return (
-    <div className="login-container">
-      <div className="login-card">
-        <h1>PesaSense-AI</h1>
-        <p>Welcome back. Please login to continue.</p>
+    <div className="auth-page">
+      <section className="auth-card">
+        <div className="auth-brand">
+          <span className="leaf-mark">P</span>
+          <h1>PesaSense-AI</h1>
+          <p>Smarter Money. Brighter Future.</p>
+        </div>
+        <div className="section-heading centered">
+          <h2>Welcome Back</h2>
+          <p>Log in to your account to continue</p>
+        </div>
 
-        <form onSubmit={handleLogin}>
-          <div>
-            <label htmlFor="username">Username</label>
+        <form className="stack-form" onSubmit={handleLogin} noValidate>
+          <div className="field-group">
+            <label htmlFor="email">Email address</label>
             <input
-              type="text"
-              id="username"
-              value={username}
-              onChange={(event) => setUsername(event.target.value)}
+              className={errors.email ? "input-error" : ""}
+              type="email"
+              id="email"
+              value={values.email}
+              onChange={(event) => updateField("email", event.target.value)}
+              autoComplete="email"
+              placeholder="you@example.com"
+              aria-invalid={Boolean(errors.email)}
               required
             />
+            {errors.email && <span className="field-error">{errors.email}</span>}
           </div>
 
-          <div>
+          <div className="field-group">
             <label htmlFor="password">Password</label>
             <input
+              className={errors.password ? "input-error" : ""}
               type="password"
               id="password"
-              value={password}
-              onChange={(event) => setPassword(event.target.value)}
+              value={values.password}
+              onChange={(event) => updateField("password", event.target.value)}
+              autoComplete="current-password"
+              placeholder="Enter your password"
+              aria-invalid={Boolean(errors.password)}
               required
             />
+            {errors.password && <span className="field-error">{errors.password}</span>}
           </div>
 
-          <button type="submit">Login</button>
+          <div className="form-options">
+            <label className="check-label">
+              <input type="checkbox" />
+              Remember me
+            </label>
+            <a href="#forgot">Forgot password?</a>
+          </div>
+
+          <button type="submit" disabled={isLoading}>
+            {isLoading ? "Logging in..." : "Log in"}
+          </button>
         </form>
 
-        <p>{message}</p>
-      </div>
+        {message && <p className="form-message error">{message}</p>}
+        <p className="auth-switch">
+          Don't have an account? <Link to="/register">Sign up</Link>
+        </p>
+      </section>
     </div>
   );
 }
