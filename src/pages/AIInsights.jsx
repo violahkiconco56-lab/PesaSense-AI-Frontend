@@ -1,25 +1,41 @@
 import { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { apiRequest } from "../api";
 import { formatUGX } from "../utils";
 
 function AIInsights() {
+  const navigate = useNavigate();
   const [insights, setInsights] = useState(null);
   const [question, setQuestion] = useState("");
   const [answer, setAnswer] = useState("");
   const [message, setMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(true);
+  const [isAsking, setIsAsking] = useState(false);
+
+  async function loadInsights() {
+    setIsLoading(true);
+    setMessage("");
+    try {
+      setInsights(await apiRequest("/transactions/insights/summary"));
+    } catch (err) {
+      setMessage(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }
 
   useEffect(() => {
-    apiRequest("/transactions/insights/summary")
-      .then(setInsights)
-      .catch((err) => setMessage(err.message));
+    loadInsights();
   }, []);
 
   async function askQuestion(event) {
     event.preventDefault();
+    if (!question.trim()) return;
     setMessage("");
     setAnswer("");
+    setIsAsking(true);
     try {
       const data = await apiRequest("/transactions/insights/question", {
         method: "POST",
@@ -28,8 +44,17 @@ function AIInsights() {
       setAnswer(data.answer);
     } catch (err) {
       setMessage(err.message);
+    } finally {
+      setIsAsking(false);
     }
   }
+
+  const categories = Object.entries(insights?.category_breakdown || {}).sort(
+    ([, first], [, second]) => second - first,
+  );
+  const budgets = insights?.budgets || [];
+  const hasData = (insights?.transaction_count || 0) > 0;
+  const savingsRate = insights?.savings_rate;
 
   return (
     <div className="app-layout">
@@ -44,37 +69,55 @@ function AIInsights() {
             </div>
           </header>
 
-          {message && <p className="form-message error">{message}</p>}
+          {message && (
+            <div className="form-message error">
+              <span>{message}</span>
+              <button type="button" onClick={loadInsights} disabled={isLoading}>
+                {isLoading ? "Retrying..." : "Retry"}
+              </button>
+            </div>
+          )}
 
           <section className="ai-hero panel">
             <div className="ai-bot">AI</div>
             <div>
               <h2>Your Financial Insights</h2>
-              <p>{insights?.summary || "Based on your recent transactions and spending patterns."}</p>
+              <p>
+                {isLoading
+                  ? "Analyzing your financial data..."
+                  : insights?.summary || "No AI summary is available yet."}
+              </p>
             </div>
           </section>
 
-          {insights?.total_income || insights?.total_expenses ? (
+          {isLoading ? (
+            <section className="insight-grid">
+              <p className="empty-state panel">Loading your financial metrics...</p>
+            </section>
+          ) : hasData ? (
             <section className="insight-grid">
               <article className="panel insight-card">
-                <span className="card-icon green">T</span>
-                <h3>Spending Trend</h3>
-                <p>Your tracked transactions are ready for analysis.</p>
+                <span className="card-icon coral">E</span>
+                <h3>Total Expenses</h3>
+                <p>{formatUGX(insights.total_expenses)}</p>
+                <small>{categories[0] ? `Top category: ${categories[0][0]}` : "No expense categories"}</small>
               </article>
               <article className="panel insight-card">
-                <span className="card-icon amber">S</span>
-                <h3>Savings Tip</h3>
-                <p>Review your largest category first for quick savings.</p>
+                <span className="card-icon green">S</span>
+                <h3>Net Balance</h3>
+                <p>{formatUGX(insights.balance)}</p>
+                <small>{savingsRate === null ? "No income baseline" : `${savingsRate}% savings rate`}</small>
               </article>
               <article className="panel insight-card">
-                <span className="card-icon violet">G</span>
-                <h3>Goal Progress</h3>
-                <p>Keep recording income and expenses to improve goal tracking.</p>
+                <span className="card-icon amber">B</span>
+                <h3>Budget Coverage</h3>
+                <p>{budgets.length} active budget{budgets.length === 1 ? "" : "s"}</p>
+                <small>{budgets.filter((budget) => budget.over_budget).length} over budget</small>
               </article>
             </section>
           ) : (
             <section className="panel">
-              <p className="empty-state">Add transactions to unlock personalized insights.</p>
+              <p className="empty-state">Add income or expenses to unlock personalized insights.</p>
             </section>
           )}
 
@@ -84,9 +127,11 @@ function AIInsights() {
                 <h2>Quick Actions</h2>
               </div>
               <div className="quick-actions">
-                <button type="button">View Detailed Report</button>
-                <button type="button">Set a Savings Goal</button>
-                <button type="button">Get More Insights</button>
+                <button type="button" onClick={() => navigate("/reports")}>View Detailed Report</button>
+                <button type="button" onClick={() => navigate("/budgets")}>Review Budgets</button>
+                <button type="button" onClick={loadInsights} disabled={isLoading}>
+                  {isLoading ? "Analyzing..." : "Refresh Insights"}
+                </button>
               </div>
             </article>
 
@@ -104,7 +149,9 @@ function AIInsights() {
                   onChange={(event) => setQuestion(event.target.value)}
                   required
                 />
-                <button type="submit">Ask question</button>
+                <button type="submit" disabled={isAsking || isLoading}>
+                  {isAsking ? "Thinking..." : "Ask question"}
+                </button>
               </form>
               {answer && <p className="answer-box">{answer}</p>}
             </article>

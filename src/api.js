@@ -1,4 +1,10 @@
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://127.0.0.1:8000";
+// Default to same-origin relative URLs. In development the Vite dev server
+// proxies /users, /transactions, /budgets and /reports to the FastAPI backend
+// (see vite.config.js), so the browser never makes a cross-origin request and
+// the app does not depend on a specific backend port being free. Set
+// VITE_API_BASE_URL only when the API lives on a different origin, e.g. a
+// deployed backend.
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export function getToken() {
   return localStorage.getItem("access_token");

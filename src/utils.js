@@ -24,3 +24,11 @@ export function currentYear() {
   return new Date().getFullYear();
 }
 
+// Broadcast when transactions change (e.g. income added from the Budget page)
+// so any mounted page can re-read its totals without duplicating API logic.
+export const TRANSACTIONS_CHANGED = "pesasense:transactions-changed";
+
+export function notifyTransactionsChanged() {
+  window.dispatchEvent(new Event(TRANSACTIONS_CHANGED));
+}
+

@@ -1,8 +1,8 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import Sidebar from "./Sidebar";
 import Topbar from "./Topbar";
 import { apiRequest } from "../api";
-import { formatDate, formatUGX } from "../utils";
+import { TRANSACTIONS_CHANGED, formatDate, formatUGX } from "../utils";
 
 function greetingForHour(hour) {
   if (hour < 12) return "Good morning";
@@ -13,18 +13,42 @@ function greetingForHour(hour) {
 
 function Dashboard() {
   const [dashboard, setDashboard] = useState(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [user, setUser] = useState(null);
   const [error, setError] = useState("");
 
+  // Totals are always re-read from the API so income added anywhere (for
+  // example through the Budget page modal) shows up immediately.
+  const loadDashboard = useCallback(async () => {
+    try {
+      const data = await apiRequest("/transactions/dashboard/summary");
+      setDashboard(data);
+      setError("");
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setIsLoading(false);
+    }
+  }, []);
+
   useEffect(() => {
-    apiRequest("/transactions/dashboard/summary")
-      .then(setDashboard)
-      .catch((err) => setError(err.message));
+    loadDashboard();
 
     apiRequest("/users/me")
       .then(setUser)
       .catch(() => setUser(null));
-  }, []);
+  }, [loadDashboard]);
+
+  // Navigating here from another page re-mounts the route, but a plain
+  // browser focus change (returning from another window) should refresh too.
+  useEffect(() => {
+    window.addEventListener("focus", loadDashboard);
+    window.addEventListener(TRANSACTIONS_CHANGED, loadDashboard);
+    return () => {
+      window.removeEventListener("focus", loadDashboard);
+      window.removeEventListener(TRANSACTIONS_CHANGED, loadDashboard);
+    };
+  }, [loadDashboard]);
 
   const displayName = user?.username || "there";
   const greeting = greetingForHour(new Date().getHours());
@@ -60,6 +84,8 @@ function Dashboard() {
           </header>
 
           {error && <p className="form-message error">{error}</p>}
+
+          {isLoading && <p className="empty-state panel">Loading your dashboard...</p>}
 
           <section className="summary-grid">
             <article className="summary-card">
