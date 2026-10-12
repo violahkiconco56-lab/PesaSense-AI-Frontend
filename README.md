@@ -1,16 +1,133 @@
-# React + Vite
+# PesaSense-AI Frontend
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+**An AI-powered personal finance management application.**
 
-Currently, two official plugins are available:
+PesaSense-AI is a personal finance application designed to help users manage their money, monitor spending habits, track budgets, and gain insights into their financial activities.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+This repository contains the frontend, built with React and Vite, providing a user-friendly interface that communicates with the PesaSense-AI backend.
 
-## React Compiler
+## ✨ Features
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+- **Financial Dashboard** — View income, expenses, and available balance at a glance.
+- **Transaction Management** — Track income and expenses in one place.
+- **Budget Tracking** — Monitor spending against monthly budgets.
+- **Spending Insights** — Understand spending patterns across different categories.
+- **AI-Powered Financial Insights** — Get intelligent feedback and recommendations based on financial activity.
+- **Backend Integration** — Communicate with the FastAPI REST API.
+- **Responsive Interface** — Designed to make financial information easy to access and understand.
 
-## Expanding the Oxlint configuration
+## 🛠️ Tech Stack
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- **React** — Component-based user interface.
+- **Vite** — Frontend development server and build tool.
+- **JavaScript** — Application logic.
+- **CSS** — Styling and layout.
+- **FastAPI** — Backend API integration.
+- **SQLAlchemy** — Backend database operations.
+
+## 📋 Prerequisites
+
+Before getting started, ensure you have installed:
+
+- Node.js (LTS recommended)
+- npm
+- Git
+- The PesaSense-AI backend, running locally or deployed to a server
+
+## 🚀 Getting Started
+
+### 1. Clone the repository
+
+```bash
+git clone YOUR_FRONTEND_REPOSITORY_URL
+```
+
+### 2. Navigate to the project directory
+
+```bash
+cd YOUR_FRONTEND_DIRECTORY
+```
+
+### 3. Install dependencies
+
+```bash
+npm install
+```
+
+### 4. Configure the backend connection
+
+Ensure the frontend is configured to communicate with your FastAPI backend.
+
+If your project uses a Vite development proxy, check `vite.config.js` and confirm that the backend target matches your running server.
+
+For example, a local backend running on port `8001` can use this proxy configuration:
+
+```javascript
+server: {
+  proxy: {
+    "/api": {
+      target: "http://127.0.0.1:8001",
+      changeOrigin: true
+    }
+  }
+}
+```
+
+Keep your existing Vite configuration and merge this example into it as needed. Your API routes must match the configured proxy path.
+
+### 5. Start the development server
+
+```bash
+npm run dev
+```
+
+Open the local URL displayed in your terminal, usually:
+
+```text
+http://localhost:5173
+```
+
+## 🏗️ Build for Production
+
+To create an optimized production build, run:
+
+```bash
+npm run build
+```
+
+To preview the production build locally:
+
+```bash
+npm run preview
+```
+
+## 🔗 Backend Integration
+
+The frontend connects to the PesaSense-AI backend, built with FastAPI, to access application data and financial functionality.
+
+The backend is responsible for authentication, transaction processing, budget management, database operations, and AI-powered financial insights.
+
+Make sure the backend is running and accessible before testing features that require API communication.
+
+## 🔐 Security
+
+- Never commit API keys, passwords, access tokens, or other secrets.
+- Keep sensitive environment variables out of version control.
+- Use HTTPS when communicating with a deployed backend.
+- Ensure authenticated API requests are handled securely.
+
+## 🎯 Project Goal
+
+PesaSense-AI aims to make personal financial management more accessible by combining practical budgeting tools with AI-driven insights. The project demonstrates the integration of a modern frontend, REST APIs, backend services, and AI capabilities to address a real-world problem.
+
+## 👩🏽‍💻 Developer
+
+**Violah Kiconco**
+
+Software Engineering | Backend Development | AI Engineering
+
+GitHub: [violahkiconco56-lab](https://github.com/violahkiconco56-lab)
+
+---
+
+*PesaSense-AI — Make informed financial decisions with greater confidence.*
