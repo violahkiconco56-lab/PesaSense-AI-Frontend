@@ -4,6 +4,7 @@ import { apiRequest, setToken } from "../api";
 
 function Login() {
   const [values, setValues] = useState({ email: "", password: "" });
+  const [rememberMe, setRememberMe] = useState(false);
   const [errors, setErrors] = useState({});
   const [message, setMessage] = useState("");
   const [isLoading, setIsLoading] = useState(false);
@@ -12,9 +13,7 @@ function Login() {
   function validate() {
     const nextErrors = {};
     if (!values.email.trim()) {
-      nextErrors.email = "Email address is required.";
-    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
-      nextErrors.email = "Enter a valid email address.";
+      nextErrors.email = "Email or username is required.";
     }
 
     if (!values.password) {
@@ -43,6 +42,7 @@ function Login() {
     const formData = new URLSearchParams();
     formData.append("username", values.email);
     formData.append("password", values.password);
+    formData.append("remember_me", String(rememberMe));
 
     try {
       const data = await apiRequest("/users/login", {
@@ -51,7 +51,7 @@ function Login() {
         body: formData,
       });
 
-      setToken(data.access_token);
+      setToken(data.access_token, rememberMe);
       navigate("/dashboard");
     } catch (error) {
       // 401 = the credentials themselves are wrong, so point at both fields.
@@ -59,7 +59,7 @@ function Login() {
       // must not falsely accuse their email or password.
       if (error.status === 401) {
         setErrors({
-          email: "Check your email address.",
+          email: "Check your email or username.",
           password: "Check your password.",
         });
         setMessage(error.message || "Invalid email or password.");
@@ -86,15 +86,15 @@ function Login() {
 
         <form className="stack-form" onSubmit={handleLogin} noValidate>
           <div className="field-group">
-            <label htmlFor="email">Email address</label>
+            <label htmlFor="email">Email or username</label>
             <input
               className={errors.email ? "input-error" : ""}
-              type="email"
+              type="text"
               id="email"
               value={values.email}
               onChange={(event) => updateField("email", event.target.value)}
-              autoComplete="email"
-              placeholder="you@example.com"
+              autoComplete="username"
+              placeholder="Email or username"
               aria-invalid={Boolean(errors.email)}
               required
             />
@@ -119,7 +119,11 @@ function Login() {
 
           <div className="form-options">
             <label className="check-label">
-              <input type="checkbox" />
+              <input
+                type="checkbox"
+                checked={rememberMe}
+                onChange={(event) => setRememberMe(event.target.checked)}
+              />
               Remember me
             </label>
             <a href="#forgot">Forgot password?</a>

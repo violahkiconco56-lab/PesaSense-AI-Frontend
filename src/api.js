@@ -7,15 +7,21 @@
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "";
 
 export function getToken() {
-  return localStorage.getItem("access_token");
+  return (
+    localStorage.getItem("access_token") ||
+    sessionStorage.getItem("access_token")
+  );
 }
 
-export function setToken(token) {
-  localStorage.setItem("access_token", token);
+export function setToken(token, rememberMe = true) {
+  clearToken();
+  const storage = rememberMe ? localStorage : sessionStorage;
+  storage.setItem("access_token", token);
 }
 
 export function clearToken() {
   localStorage.removeItem("access_token");
+  sessionStorage.removeItem("access_token");
 }
 
 export async function apiRequest(path, options = {}) {
@@ -67,4 +73,3 @@ export async function apiRequest(path, options = {}) {
 
   return data;
 }
-
