@@ -4,6 +4,7 @@ import Login from "./pages/Login";
 import Register from "./pages/Register";
 import VerifyEmail from "./pages/VerifyEmail";
 import Dashboard from "./pages/Dashboard";
+import Goals from "./pages/Goals";
 import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
 import Reports from "./pages/Reports";
@@ -34,6 +35,14 @@ function App() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/goals"
+          element={
+            <ProtectedRoute>
+              <Goals />
             </ProtectedRoute>
           }
         />

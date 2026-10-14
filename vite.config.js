@@ -3,7 +3,15 @@ import { defineConfig, loadEnv } from 'vite'
 
 // Every API prefix the app calls is forwarded to the backend, so the browser
 // talks to the Vite dev server (same origin) and CORS never applies.
-const API_PREFIXES = ['/users', '/transactions', '/budgets', '/reports']
+const API_PREFIXES = [
+  '/users',
+  '/transactions',
+  '/budgets',
+  '/reports',
+  '/analytics',
+  '/goals',
+  '/recurring-bills',
+]
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {

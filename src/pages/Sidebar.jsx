@@ -61,6 +61,13 @@ function Sidebar() {
           </NavIcon>
           Budgets
         </NavLink>
+        <NavLink to="/goals">
+          <NavIcon>
+            <path d="M12 21s-7-4.4-7-11a4 4 0 0 1 7-2.6A4 4 0 0 1 19 10c0 6.6-7 11-7 11z" />
+            <path d="M9 12h6M12 9v6" />
+          </NavIcon>
+          Savings Goals
+        </NavLink>
         <NavLink to="/reports">
           <NavIcon>
             <path d="M4 20V10M10 20V4M16 20v-7M22 20H2" />
