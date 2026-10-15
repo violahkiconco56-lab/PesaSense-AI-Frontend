@@ -15,6 +15,21 @@ const blankForm = {
   date: todayISODate(),
 };
 
+const CATEGORIES = [
+  "Food",
+  "Transport",
+  "Bills",
+  "Rent",
+  "Airtime & Data",
+  "Health",
+  "Education",
+  "Entertainment",
+  "Shopping",
+  "Savings",
+  "Business",
+  "Other",
+];
+
 function Transactions() {
   const [transactions, setTransactions] = useState([]);
   const [form, setForm] = useState(blankForm);
@@ -219,12 +234,17 @@ function Transactions() {
                 />
 
                 <label htmlFor="category">Category</label>
-                <input
+                <select
                   id="category"
                   value={form.category}
                   onChange={(event) => setForm({ ...form, category: event.target.value })}
                   required
-                />
+                >
+                  <option value="">Select a category</option>
+                  {CATEGORIES.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
+                </select>
 
                 <label htmlFor="description">Description</label>
                 <input
