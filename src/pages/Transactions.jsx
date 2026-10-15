@@ -26,8 +26,8 @@ function Transactions() {
   const totals = useMemo(() => {
     return transactions.reduce(
       (acc, transaction) => {
-        if (transaction.transaction_type === "income") acc.income += transaction.amount;
-        if (transaction.transaction_type === "expense") acc.expenses += transaction.amount;
+        if (transaction.transaction_type === "income") acc.income += Number(transaction.amount);
+        if (transaction.transaction_type === "expense") acc.expenses += Number(transaction.amount);
         return acc;
       },
       { income: 0, expenses: 0 }
