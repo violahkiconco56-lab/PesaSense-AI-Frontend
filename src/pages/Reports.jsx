@@ -4,37 +4,80 @@ import Topbar from "./Topbar";
 import { apiRequest } from "../api";
 import { formatDate, formatUGX, todayISODate } from "../utils";
 
+const PREVIOUS_LABEL = {
+  daily: "yesterday",
+  weekly: "last week",
+  monthly: "last month",
+  yearly: "last year",
+};
+
+function buildEndpoint(period, dateStr) {
+  const selected = new Date(`${dateStr}T00:00:00`);
+  if (period === "monthly") {
+    return `/reports/monthly?month=${selected.getMonth() + 1}&year=${selected.getFullYear()}`;
+  }
+  if (period === "yearly") return `/reports/yearly?year=${selected.getFullYear()}`;
+  return `/reports/${period}?report_date=${dateStr}`;
+}
+
+function previousDate(period, dateStr) {
+  const d = new Date(`${dateStr}T00:00:00`);
+  if (period === "daily") d.setDate(d.getDate() - 1);
+  else if (period === "weekly") d.setDate(d.getDate() - 7);
+  else if (period === "monthly") d.setMonth(d.getMonth() - 1, 1);
+  else d.setFullYear(d.getFullYear() - 1);
+  const pad = (n) => String(n).padStart(2, "0");
+  return `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+}
+
+function percentChange(current, previous) {
+  const cur = Number(current);
+  const prev = Number(previous);
+  if (!Number.isFinite(cur) || !Number.isFinite(prev) || prev === 0) return null;
+  return ((cur - prev) / Math.abs(prev)) * 100;
+}
+
+function changeText(change, period) {
+  const label = PREVIOUS_LABEL[period];
+  if (change === null) return `No data for ${label}`;
+  const sign = change > 0 ? "+" : "";
+  return `${sign}${change.toFixed(1)}% vs ${label}`;
+}
+
 function Reports() {
   const [period, setPeriod] = useState("monthly");
   const [reportDate, setReportDate] = useState(todayISODate());
   const [report, setReport] = useState(null);
+  const [previousReport, setPreviousReport] = useState(null);
   const [message, setMessage] = useState("");
 
   async function loadReport() {
     setMessage("");
-    const selected = new Date(`${reportDate}T00:00:00`);
-    const month = selected.getMonth() + 1;
-    const year = selected.getFullYear();
-    const endpoint =
-      period === "monthly"
-        ? `/reports/monthly?month=${month}&year=${year}`
-        : period === "yearly"
-          ? `/reports/yearly?year=${year}`
-          : `/reports/${period}?report_date=${reportDate}`;
-
     try {
-      setReport(await apiRequest(endpoint));
+      setReport(await apiRequest(buildEndpoint(period, reportDate)));
     } catch (err) {
       setMessage(err.message);
+      return;
+    }
+    try {
+      setPreviousReport(
+        await apiRequest(buildEndpoint(period, previousDate(period, reportDate))),
+      );
+    } catch {
+      setPreviousReport(null);
     }
   }
 
   useEffect(() => {
     loadReport();
-  }, []);
+  }, [period, reportDate]);
 
   const categories = Object.entries(report?.category_breakdown || {});
   const hasReportData = (report?.transactions || []).length > 0;
+
+  const incomeChange = percentChange(report?.total_income, previousReport?.total_income);
+  const expenseChange = percentChange(report?.total_expenses, previousReport?.total_expenses);
+  const balanceChange = percentChange(report?.balance, previousReport?.balance);
 
   return (
     <div className="app-layout">
@@ -74,19 +117,21 @@ function Reports() {
               <span className="card-icon violet">I</span>
               <h3>Total Income</h3>
               <p>{formatUGX(report?.total_income)}</p>
-              <small>12%</small>
+              <small>{changeText(incomeChange, period)}</small>
             </article>
             <article className="summary-card">
               <span className="card-icon coral">E</span>
               <h3>Total Expenses</h3>
               <p>{formatUGX(report?.total_expenses)}</p>
-              <small className="danger-text">8%</small>
+              <small className={expenseChange > 0 ? "danger-text" : undefined}>
+                {changeText(expenseChange, period)}
+              </small>
             </article>
             <article className="summary-card">
               <span className="card-icon teal">B</span>
               <h3>Balance</h3>
               <p>{formatUGX(report?.balance)}</p>
-              <small>15%</small>
+              <small>{changeText(balanceChange, period)}</small>
             </article>
           </section>
 
