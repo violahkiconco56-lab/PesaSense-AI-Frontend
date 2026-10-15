@@ -9,6 +9,8 @@ import Transactions from "./pages/Transactions";
 import Budgets from "./pages/Budgets";
 import Reports from "./pages/Reports";
 import AIInsights from "./pages/AIInsights";
+import FinancialAccounts from "./pages/FinancialAccounts";
+import StatementImport from "./pages/StatementImport";
 import { getToken } from "./api";
 
 function ProtectedRoute({ children }) {
@@ -35,6 +37,22 @@ function App() {
           element={
             <ProtectedRoute>
               <Transactions />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/accounts"
+          element={
+            <ProtectedRoute>
+              <FinancialAccounts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/imports"
+          element={
+            <ProtectedRoute>
+              <StatementImport />
             </ProtectedRoute>
           }
         />

@@ -10,6 +10,8 @@ This repository contains the frontend, built with React and Vite, providing a us
 
 - **Financial Dashboard** — View income, expenses, and available balance at a glance.
 - **Transaction Management** — Track income and expenses in one place.
+- **Financial Accounts** — Manage mobile money, bank, and manual accounts.
+- **Statement Import** — Preview and import transactions from user-provided CSV statements.
 - **Budget Tracking** — Monitor spending against monthly budgets.
 - **Spending Insights** — Understand spending patterns across different categories.
 - **AI-Powered Financial Insights** — Get intelligent feedback and recommendations based on financial activity.
@@ -108,6 +110,33 @@ The frontend connects to the PesaSense-AI backend, built with FastAPI, to access
 The backend is responsible for authentication, transaction processing, budget management, database operations, and AI-powered financial insights.
 
 Make sure the backend is running and accessible before testing features that require API communication.
+
+### CSV statement imports
+
+Imports use the authenticated endpoints `POST /transactions/import/preview` and
+`POST /transactions/import`. The import page previews the selected file before
+the user confirms; the file is submitted again for confirmation, processed
+transiently, and not retained. Defaults are a 5 MiB upload limit and 1,000 CSV
+rows; set `CSV_IMPORT_MAX_BYTES` and `CSV_IMPORT_MAX_ROWS` to adjust them.
+Before using imports with an existing database, run
+`python -m alembic upgrade head` from the project root. This applies migration
+`007` after the user-owned-accounts migration `006`; `create_all` does not
+update existing tables.
+
+Use a UTF-8 CSV (an optional UTF-8 BOM is supported) with this header:
+
+```csv
+date,description,amount,transaction_type,category
+2026-10-01,Groceries,24500,expense,Food
+2026-10-02,Salary,1500000,income,Salary
+```
+
+The required columns are `date`, `description`, `amount`, and
+`transaction_type`; `category` is optional and defaults to `Other`. Dates must
+be ISO dates or ISO date-times, amounts must be positive decimal values with up
+to eight fractional digits, and types must be `income` or `expense`. Transfers
+are not supported and are marked for review rather than classified as income
+or expenses. Re-imported statement rows are skipped as duplicates per account.
 
 ## 🔐 Security
 

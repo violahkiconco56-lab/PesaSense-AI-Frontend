@@ -6,6 +6,7 @@ import { defineConfig, loadEnv } from 'vite'
 const API_PREFIXES = [
   '/users',
   '/transactions',
+  '/financial-accounts',
   '/budgets',
   '/reports',
   '/analytics',

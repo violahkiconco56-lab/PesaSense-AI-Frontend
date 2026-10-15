@@ -1,5 +1,5 @@
 // Default to same-origin relative URLs. In development the Vite dev server
-// proxies /users, /transactions, /budgets and /reports to the FastAPI backend
+// proxies the app's API routes to the FastAPI backend
 // (see vite.config.js), so the browser never makes a cross-origin request and
 // the app does not depend on a specific backend port being free. Set
 // VITE_API_BASE_URL only when the API lives on a different origin, e.g. a
@@ -32,7 +32,11 @@ export async function apiRequest(path, options = {}) {
     headers.set("Authorization", `Bearer ${token}`);
   }
 
-  if (options.body && !(options.body instanceof URLSearchParams)) {
+  if (
+    options.body &&
+    !(options.body instanceof URLSearchParams) &&
+    !(typeof FormData !== "undefined" && options.body instanceof FormData)
+  ) {
     headers.set("Content-Type", "application/json");
   }
 

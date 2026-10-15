@@ -54,6 +54,20 @@ function Sidebar() {
           </NavIcon>
           Transactions
         </NavLink>
+        <NavLink to="/accounts">
+          <NavIcon>
+            <rect x="3" y="5" width="18" height="14" rx="2" />
+            <path d="M3 10h18M7 15h3" />
+          </NavIcon>
+          Financial Accounts
+        </NavLink>
+        <NavLink to="/imports">
+          <NavIcon>
+            <path d="M12 3v12m0 0 4-4m-4 4-4-4" />
+            <path d="M5 17v3h14v-3" />
+          </NavIcon>
+          Import Statement
+        </NavLink>
         <NavLink to="/budgets">
           <NavIcon>
             <path d="M3 7a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />

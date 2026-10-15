@@ -1880,6 +1880,287 @@ label {
   gap: 14px;
 }
 
+.statement-import-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.7fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.statement-import-form,
+.statement-preview-section {
+  min-width: 0;
+}
+
+.statement-import-form {
+  position: sticky;
+  top: 20px;
+}
+
+.csv-format-note {
+  display: grid;
+  gap: 7px;
+  border: 1px solid var(--line);
+  border-radius: 7px;
+  background: var(--panel-soft);
+  padding: 12px;
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.5;
+}
+
+.csv-format-note strong {
+  color: var(--ink);
+}
+
+.csv-format-note code {
+  overflow-wrap: anywhere;
+  color: var(--green-900);
+  font-size: 0.74rem;
+}
+
+.statement-link {
+  width: fit-content;
+  margin-top: 12px;
+  padding: 10px 14px;
+}
+
+.statement-counts {
+  margin: 14px 0;
+}
+
+.statement-counts .summary-card {
+  min-height: 100px;
+  padding: 14px;
+}
+
+.statement-counts .summary-card h3 {
+  margin-top: 0;
+}
+
+.statement-preview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  margin: 14px 0;
+}
+
+.statement-preview-actions p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.statement-preview-actions > div {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.statement-preview-empty {
+  padding: 22px;
+}
+
+.statement-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  background: var(--panel);
+}
+
+.statement-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.8rem;
+  text-align: left;
+}
+
+.statement-table th,
+.statement-table td {
+  padding: 10px 11px;
+  border-bottom: 1px solid var(--line);
+  vertical-align: top;
+}
+
+.statement-table th {
+  background: var(--panel-soft);
+  color: var(--muted);
+  font-size: 0.72rem;
+  white-space: nowrap;
+}
+
+.statement-table tr:last-child td {
+  border-bottom: 0;
+}
+
+.statement-description {
+  min-width: 145px;
+  overflow-wrap: anywhere;
+}
+
+.import-status {
+  display: inline-block;
+  border-radius: 999px;
+  padding: 4px 8px;
+  font-size: 0.7rem;
+  font-weight: 900;
+  white-space: nowrap;
+}
+
+.import-status.valid {
+  background: var(--green-100);
+  color: var(--green-900);
+}
+
+.import-status.duplicate {
+  background: #fff3d8;
+  color: #80520a;
+}
+
+.import-status.invalid {
+  background: #fdeced;
+  color: #a12f3f;
+}
+
+.import-row-error {
+  display: block;
+  max-width: 240px;
+  margin-top: 5px;
+  color: #a12f3f;
+}
+
+@media (max-width: 1100px) {
+  .statement-import-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .statement-import-form {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .statement-preview-actions {
+    align-items: stretch;
+    flex-direction: column;
+  }
+}
+
+.accounts-summary {
+  margin-bottom: 20px;
+}
+
+.accounts-layout {
+  display: grid;
+  grid-template-columns: minmax(260px, 0.72fr) minmax(0, 1.5fr);
+  align-items: start;
+  gap: 20px;
+}
+
+.account-form-panel {
+  position: sticky;
+  top: 20px;
+}
+
+.account-form-panel .section-heading p,
+.account-list-section .section-heading p {
+  margin: 6px 0 0;
+  color: var(--muted);
+  font-size: 0.84rem;
+}
+
+.account-form-actions,
+.account-card-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 9px;
+}
+
+.account-list-section {
+  min-width: 0;
+}
+
+.account-card-list {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  align-items: start;
+  gap: 14px;
+}
+
+.account-card {
+  min-width: 0;
+  padding: 16px;
+}
+
+.account-card-heading,
+.account-card-footer {
+  display: flex;
+  align-items: center;
+  gap: 11px;
+}
+
+.account-card-heading > div {
+  min-width: 0;
+  flex: 1;
+}
+
+.account-card-heading h3 {
+  overflow-wrap: anywhere;
+  margin: 0 0 4px;
+  font-size: 1rem;
+}
+
+.account-card-heading > div > span,
+.account-card-footer small {
+  color: var(--muted);
+  font-size: 0.78rem;
+}
+
+.account-currency {
+  flex: 0 0 auto;
+  border-radius: 999px;
+  background: var(--green-100);
+  color: var(--green-900);
+  padding: 5px 9px;
+  font-size: 0.72rem;
+  font-weight: 900;
+}
+
+.account-card-footer {
+  justify-content: space-between;
+  flex-wrap: wrap;
+  margin-top: 18px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+.account-card-actions button {
+  min-height: 32px;
+  padding: 0 10px;
+  font-size: 0.78rem;
+}
+
+.account-list-state {
+  padding: 22px;
+}
+
+@media (max-width: 1100px) {
+  .accounts-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .account-form-panel {
+    position: static;
+  }
+}
+
+@media (max-width: 820px) {
+  .account-card-list {
+    grid-template-columns: 1fr;
+  }
+}
+
 .goal-card {
   display: grid;
   min-width: 0;
