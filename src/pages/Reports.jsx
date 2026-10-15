@@ -44,17 +44,58 @@ function changeText(change, period) {
   return `${sign}${change.toFixed(1)}% vs ${label}`;
 }
 
+function parseDay(value) {
+  const [y, m, d] = String(value).slice(0, 10).split("-").map(Number);
+  return { y, m, d };
+}
+
+function buildBuckets(period, report) {
+  const transactions = report?.transactions || [];
+  let labels = ["Day"];
+  let indexOf = () => 0;
+
+  if (period === "monthly") {
+    labels = ["Week 1", "Week 2", "Week 3", "Week 4"];
+    indexOf = (t) => Math.min(Math.floor((parseDay(t.date).d - 1) / 7), 3);
+  } else if (period === "yearly") {
+    labels = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+    indexOf = (t) => parseDay(t.date).m - 1;
+  } else if (period === "weekly" && report?.start_date) {
+    const s = parseDay(report.start_date);
+    const startMs = Date.UTC(s.y, s.m - 1, s.d);
+    labels = Array.from({ length: 7 }, (_, i) =>
+      new Date(startMs + i * 86400000).toLocaleDateString("en-GB", { weekday: "short", timeZone: "UTC" }),
+    );
+    indexOf = (t) => {
+      const p = parseDay(t.date);
+      return Math.floor((Date.UTC(p.y, p.m - 1, p.d) - startMs) / 86400000);
+    };
+  }
+
+  const buckets = labels.map((label) => ({ label, income: 0, expense: 0 }));
+  transactions.forEach((t) => {
+    const bucket = buckets[indexOf(t)];
+    if (!bucket) return;
+    if (t.transaction_type === "income") bucket.income += Number(t.amount);
+    if (t.transaction_type === "expense") bucket.expense += Number(t.amount);
+  });
+  return buckets;
+}
+
 function Reports() {
   const [period, setPeriod] = useState("monthly");
   const [reportDate, setReportDate] = useState(todayISODate());
   const [report, setReport] = useState(null);
   const [previousReport, setPreviousReport] = useState(null);
+  const [reportPeriod, setReportPeriod] = useState("monthly");
   const [message, setMessage] = useState("");
 
   async function loadReport() {
     setMessage("");
     try {
-      setReport(await apiRequest(buildEndpoint(period, reportDate)));
+      const data = await apiRequest(buildEndpoint(period, reportDate));
+      setReport(data);
+      setReportPeriod(period);
     } catch (err) {
       setMessage(err.message);
       return;
@@ -74,6 +115,10 @@ function Reports() {
 
   const categories = Object.entries(report?.category_breakdown || {});
   const hasReportData = (report?.transactions || []).length > 0;
+
+  const buckets = buildBuckets(reportPeriod, report);
+  const maxValue = Math.max(1, ...buckets.flatMap((b) => [b.income, b.expense]));
+  const barHeight = (value) => `${value > 0 ? Math.max((value / maxValue) * 100, 3) : 1}%`;
 
   const incomeChange = percentChange(report?.total_income, previousReport?.total_income);
   const expenseChange = percentChange(report?.total_expenses, previousReport?.total_expenses);
@@ -143,12 +188,23 @@ function Reports() {
               </div>
               {hasReportData ? (
                 <>
-                  <div className="bar-chart" aria-hidden="true">
-                    {[72, 52, 70, 49, 84, 56, 82, 62].map((height, index) => (
-                      <span key={`${height}-${index}`} style={{ height: `${height}%` }} />
-                    ))}
+                  <div className="bar-chart">
+                    {buckets.flatMap((b) => [
+                      <span
+                        key={`${b.label}-income`}
+                        title={`${b.label} income: ${formatUGX(b.income)}`}
+                        style={{ height: barHeight(b.income) }}
+                      />,
+                      <span
+                        key={`${b.label}-expense`}
+                        title={`${b.label} expenses: ${formatUGX(b.expense)}`}
+                        style={{ height: barHeight(b.expense), background: "#e05a6d" }}
+                      />,
+                    ])}
                   </div>
-                  <div className="chart-labels"><span>Week 1</span><span>Week 2</span><span>Week 3</span><span>Week 4</span></div>
+                  <div className="chart-labels">
+                    {buckets.map((b) => <span key={b.label}>{b.label}</span>)}
+                  </div>
                 </>
               ) : (
                 <p className="empty-state chart-empty">No report data for this period yet.</p>
