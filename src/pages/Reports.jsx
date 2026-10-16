@@ -11,6 +11,31 @@ const PREVIOUS_LABEL = {
   yearly: "last year",
 };
 
+const DONUT_COLORS = [
+  "#0b4c35",
+  "#78a95e",
+  "#e8a33d",
+  "#6d7b5c",
+  "#e05a6d",
+  "#424940",
+  "#c9d5bd",
+  "#9a6fb0",
+];
+
+function buildDonutGradient(entries) {
+  const values = entries.map(([, amount]) => Number(amount) || 0);
+  const total = values.reduce((sum, value) => sum + value, 0);
+  if (total <= 0) return "#e3e6e4";
+  let running = 0;
+  const stops = values.map((value, index) => {
+    const start = (running / total) * 100;
+    running += value;
+    const end = (running / total) * 100;
+    return `${DONUT_COLORS[index % DONUT_COLORS.length]} ${start}% ${end}%`;
+  });
+  return `conic-gradient(${stops.join(", ")})`;
+}
+
 function buildEndpoint(period, dateStr) {
   const selected = new Date(`${dateStr}T00:00:00`);
   if (period === "monthly") {
@@ -217,10 +242,24 @@ function Reports() {
               </div>
               {categories.length ? (
                 <div className="donut-wrap">
-                  <div className="donut"><span>{formatUGX(report?.total_expenses)}</span></div>
+                  <div className="donut" style={{ background: buildDonutGradient(categories) }}>
+                    <span>{formatUGX(report?.total_expenses)}</span>
+                  </div>
                   <div className="legend-list">
-                    {categories.map(([category, amount]) => (
-                      <span key={category}>{category} {formatUGX(amount)}</span>
+                    {categories.map(([category, amount], index) => (
+                      <span key={category}>
+                        <span
+                          style={{
+                            display: "inline-block",
+                            width: "12px",
+                            height: "12px",
+                            borderRadius: "50%",
+                            marginRight: "8px",
+                            background: DONUT_COLORS[index % DONUT_COLORS.length],
+                          }}
+                        />
+                        {category} {formatUGX(amount)}
+                      </span>
                     ))}
                   </div>
                 </div>

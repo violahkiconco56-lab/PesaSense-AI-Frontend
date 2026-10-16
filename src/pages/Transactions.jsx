@@ -37,6 +37,8 @@ function Transactions() {
   const [message, setMessage] = useState("");
   const [isMessageError, setIsMessageError] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchTerm, setSearchTerm] = useState("");
 
   const totals = useMemo(() => {
     return transactions.reduce(
@@ -58,6 +60,25 @@ function Transactions() {
     () => transactions.filter((transaction) => transaction.transaction_type !== "income"),
     [transactions]
   );
+
+  // Filter options come from the expenses that actually exist.
+  const filterCategories = useMemo(() => {
+    const found = new Set();
+    expenseTransactions.forEach((transaction) => {
+      if (transaction.category) found.add(transaction.category);
+    });
+    return Array.from(found).sort((a, b) => a.localeCompare(b));
+  }, [expenseTransactions]);
+
+  const visibleExpenses = useMemo(() => {
+    const term = searchTerm.trim().toLowerCase();
+    return expenseTransactions.filter((transaction) => {
+      if (categoryFilter !== "all" && transaction.category !== categoryFilter) return false;
+      if (!term) return true;
+      const text = `${transaction.description || ""} ${transaction.category || ""}`.toLowerCase();
+      return text.includes(term);
+    });
+  }, [expenseTransactions, categoryFilter, searchTerm]);
 
   const loadTransactions = useCallback(async () => {
     const data = await apiRequest("/transactions/?skip=0&limit=100");
@@ -153,10 +174,22 @@ function Transactions() {
           <section className="content-grid wide-first">
             <article className="panel">
               <div className="filters compact-filters">
-                <select aria-label="Category filter" defaultValue="all">
+                <select
+                  aria-label="Category filter"
+                  value={categoryFilter}
+                  onChange={(event) => setCategoryFilter(event.target.value)}
+                >
                   <option value="all">All Categories</option>
+                  {filterCategories.map((category) => (
+                    <option key={category} value={category}>{category}</option>
+                  ))}
                 </select>
-                <input type="search" placeholder="Search expenses..." />
+                <input
+                  type="search"
+                  placeholder="Search expenses..."
+                  value={searchTerm}
+                  onChange={(event) => setSearchTerm(event.target.value)}
+                />
               </div>
               <div className="section-heading">
                 <h2>Expenditure</h2>
@@ -166,7 +199,7 @@ function Transactions() {
                 <div className="data-head">
                   <span>Date</span><span>Description</span><span>Category</span><span>Type</span><span>Amount</span>
                 </div>
-                {expenseTransactions.map((transaction) => (
+                {visibleExpenses.map((transaction) => (
                   <div className="data-row" key={transaction.id}>
                     <span>{formatDate(transaction.date)}</span>
                     <strong>{transaction.description || transaction.category}</strong>
@@ -177,8 +210,12 @@ function Transactions() {
                     <b>{formatUGX(transaction.amount)}</b>
                   </div>
                 ))}
-                {expenseTransactions.length === 0 && !isLoading && (
-                  <p className="empty-state">No expenses found.</p>
+                {visibleExpenses.length === 0 && !isLoading && (
+                  <p className="empty-state">
+                    {expenseTransactions.length === 0
+                      ? "No expenses found."
+                      : "No expenses match your filter."}
+                  </p>
                 )}
                 {isLoading && <p className="empty-state">Loading transactions...</p>}
               </div>
