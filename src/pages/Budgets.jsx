@@ -335,43 +335,58 @@ function Budgets() {
                       No budgets yet. Create one to track spending against a limit.
                     </p>
                   ) : (
-                    <div className="budget-card-grid">
+                    <div className="budget-list" style={{ overflowX: "auto" }}>
+                      <div
+                        style={{
+                          display: "grid",
+                          gridTemplateColumns: "minmax(140px, 2fr) 1fr 1fr 1fr auto",
+                          gap: "12px",
+                          padding: "8px 4px",
+                          fontSize: "13px",
+                          fontWeight: 700,
+                          textTransform: "uppercase",
+                          opacity: 0.65,
+                        }}
+                      >
+                        <span>Category</span>
+                        <span>Budget</span>
+                        <span>Spent</span>
+                        <span>Remaining</span>
+                        <span>Status</span>
+                      </div>
                       {budgets.map((budget) => {
                         const pace = paceFor(budget.used_percentage);
                         const barWidth = Math.max(0, Math.min(100, budget.used_percentage));
                         return (
-                          <article className="budget-card" key={budget.budget_id}>
-                            <header className="budget-card-head">
-                              <span className="card-icon amber">{budget.category.slice(0, 1)}</span>
+                          <div
+                            key={budget.budget_id}
+                            style={{ padding: "12px 4px", borderTop: "1px solid #e3e6e4" }}
+                          >
+                            <div
+                              style={{
+                                display: "grid",
+                                gridTemplateColumns: "minmax(140px, 2fr) 1fr 1fr 1fr auto",
+                                gap: "12px",
+                                alignItems: "center",
+                              }}
+                            >
                               <div>
-                                <h3>{budget.category}</h3>
+                                <strong>{budget.category}</strong>
+                                <br />
                                 <small>
-                                  {budget.month}/{budget.year}
+                                  {budget.month}/{budget.year} · {Math.round(budget.used_percentage)}% used
                                 </small>
                               </div>
+                              <span>{formatUGX(budget.limit_amount)}</span>
+                              <span>{formatUGX(budget.spent)}</span>
+                              <strong
+                                className={budget.remaining < 0 ? "danger-text" : "positive-text"}
+                              >
+                                {formatUGX(budget.remaining)}
+                              </strong>
                               <span className={`pace-pill ${pace.tone}`}>{pace.label}</span>
-                            </header>
-
-                            <div className="budget-figures">
-                              <div>
-                                <span>Budget</span>
-                                <strong>{formatUGX(budget.limit_amount)}</strong>
-                              </div>
-                              <div>
-                                <span>Spent</span>
-                                <strong>{formatUGX(budget.spent)}</strong>
-                              </div>
-                              <div>
-                                <span>Remaining</span>
-                                <strong
-                                  className={budget.remaining < 0 ? "danger-text" : "positive-text"}
-                                >
-                                  {formatUGX(budget.remaining)}
-                                </strong>
-                              </div>
                             </div>
-
-                            <div className="meter large">
+                            <div className="meter" style={{ marginTop: "8px" }}>
                               <span
                                 className={
                                   pace.tone === "danger" ? "danger" : pace.tone === "warn" ? "warn" : ""
@@ -379,13 +394,7 @@ function Budgets() {
                                 style={{ width: `${barWidth}%` }}
                               />
                             </div>
-                            <small className="budget-caption">
-                              {Math.round(budget.used_percentage)}% used
-                              {budget.over_budget
-                                ? ` \u00b7 ${formatUGX(Math.abs(budget.remaining))} over`
-                                : ` \u00b7 ${formatUGX(budget.remaining)} left`}
-                            </small>
-                          </article>
+                          </div>
                         );
                       })}
                     </div>
