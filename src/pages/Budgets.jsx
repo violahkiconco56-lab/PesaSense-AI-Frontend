@@ -13,6 +13,21 @@ const blankBudget = {
   year: currentYear(),
 };
 
+const CATEGORIES = [
+  "Food",
+  "Transport",
+  "Bills",
+  "Rent",
+  "Airtime & Data",
+  "Health",
+  "Education",
+  "Entertainment",
+  "Shopping",
+  "Savings",
+  "Business",
+  "Other",
+];
+
 // % of a budget used that counts as "watch this".
 const WATCH_THRESHOLD = 80;
 
@@ -425,13 +440,17 @@ function Budgets() {
                       </div>
                       <form className="stack-form" onSubmit={handleSubmit}>
                         <label htmlFor="category">Category</label>
-                        <input
+                        <select
                           id="category"
-                          placeholder="e.g. Food"
                           value={form.category}
                           onChange={(event) => setForm({ ...form, category: event.target.value })}
                           required
-                        />
+                        >
+                          <option value="">Select a category</option>
+                          {CATEGORIES.map((category) => (
+                            <option key={category} value={category}>{category}</option>
+                          ))}
+                        </select>
                         <label htmlFor="limit_amount">Limit amount (UGX)</label>
                         <input
                           id="limit_amount"
