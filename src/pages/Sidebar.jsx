@@ -95,6 +95,13 @@ function Sidebar() {
           </NavIcon>
           AI Insights
         </NavLink>
+        <NavLink to="/pricing">
+          <NavIcon>
+            <path d="M12 2.5v19" />
+            <path d="M17 7.5c0-1.7-2.2-3-5-3s-5 1.3-5 3 2.2 3 5 3 5 1.3 5 3-2.2 3-5 3-5-1.3-5-3" />
+          </NavIcon>
+          Upgrade
+        </NavLink>
       </nav>
 
       <button className="logout-button" onClick={handleLogout}>

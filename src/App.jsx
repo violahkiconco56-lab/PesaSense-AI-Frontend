@@ -11,6 +11,7 @@ import Reports from "./pages/Reports";
 import AIInsights from "./pages/AIInsights";
 import FinancialAccounts from "./pages/FinancialAccounts";
 import StatementImport from "./pages/StatementImport";
+import Pricing from "./pages/Pricing";
 import { getToken } from "./api";
 
 function ProtectedRoute({ children }) {
@@ -85,6 +86,14 @@ function App() {
           element={
             <ProtectedRoute>
               <AIInsights />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/pricing"
+          element={
+            <ProtectedRoute>
+              <Pricing />
             </ProtectedRoute>
           }
         />

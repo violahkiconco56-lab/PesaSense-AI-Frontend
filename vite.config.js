@@ -12,15 +12,14 @@ const API_PREFIXES = [
   '/analytics',
   '/goals',
   '/recurring-bills',
+  '/payments',
 ]
 
 // https://vite.dev/config/
 export default defineConfig(({ mode }) => {
-  // Load .env files so VITE_PROXY_TARGET can be set there. Port 8000 is
-  // commonly taken on this machine (another Django app is served through
-  // Docker/WSL there), so the FastAPI backend defaults to 8010.
+  // Load .env files so VITE_PROXY_TARGET can override the local backend.
   const env = loadEnv(mode, process.cwd(), '')
-  const backendTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8010'
+  const backendTarget = env.VITE_PROXY_TARGET || 'http://127.0.0.1:8001'
 
   return {
     plugins: [react()],
